@@ -144,7 +144,7 @@ def calcCroplandData(extent):
         finalresults = []
         thedbf = dbf.Dbf(tempfile + ".vat.dbf")
         for row in thedbf:
-            temparea = row[4]*90*.000247105381
+            temparea = row[4]*900*.000247105381
             finalresults.append([row[5], row[4], temparea])
             #results += str(row)
     except Exception as e:
