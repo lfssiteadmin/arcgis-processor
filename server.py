@@ -9,7 +9,7 @@ import time
 # Create server
 #amp-7vcj3h1-dt
 #server = SimpleXMLRPCServer(("0.0.0.0", 8000), )
-server = SimpleXMLRPCServer(("164.107.86.141", 8000), )
+server = SimpleXMLRPCServer(("164.107.87.183", 8000), )
 
 
 server.register_introspection_functions()
@@ -252,7 +252,7 @@ class MyFuncs:
         extentsplit = extent.split(",")
         extent = " ".join([extentsplit[0], extentsplit[3], extentsplit[2], extentsplit[1]])
         WORKINGDIRECTORY = "D:/GIS Server Data/datafiles/"
-        processingfiles = ["Agritourism_resample", "ahi_resample", "biodigestor_resample", "grapes_resample", "manurespread_resample", "solarsuit_resample", "winsuit_resample"]
+        processingfiles = ["Agritourism_google", "ahi_google", "biodigestor_google", "grapes_google", "manurespread_google", "solarsuit_google", "winsuit_google"]
         finalresults = []
         for thefile in processingfiles:
             print "Doing " + thefile
