@@ -49,16 +49,15 @@ def createExtentFile(extent):
     
     # Get the template feature class
     #
-    template = "D:\\GIS Server Data\\agstats\\Receipts.shp"
+    template = "D:\\GIS Server Data\\templatefile.shp"
     
     try:
        # Create the output feature class
        #
-       print os.path.dirname(tempextentfile)
-       print os.path.basename(tempextentfile)
+
        arcpy.CreateFeatureclass_management(os.path.dirname(tempextentfile),
                                            os.path.basename(tempextentfile), 
-                                           "Polygon", template)
+                                           "Polygon", template, "DISABLED", "DISABLED", template)
     
        # Open an insert cursor for the new feature class
        #
@@ -82,14 +81,15 @@ def createExtentFile(extent):
        pnt.X = extentsplit[2]
        pnt.Y = extentsplit[1]   
        lineArray.add(pnt)
-       #Top left
-       pnt.X = extentsplit[0]
-       pnt.Y = extentsplit[3]   
-       lineArray.add(pnt)      
        #Top Right
        pnt.X = extentsplit[2]
        pnt.Y = extentsplit[3]   
        lineArray.add(pnt)
+       #Top left
+       pnt.X = extentsplit[0]
+       pnt.Y = extentsplit[3]   
+       lineArray.add(pnt)      
+
 
        
        feat = cur.newRow()
@@ -108,7 +108,6 @@ def calcCroplandData(extent):
     
     # Check out any necessary licenses
     arcpy.CheckOutExtension("spatial")
-    print extent
     #extent = "-9099915, 5051882, -9043924, 5037452"
     extentfile = createExtentFile(extent)
     if (extentfile == "error"):
@@ -202,7 +201,7 @@ def calcPolygonValues(extentfile, processingFile, attributes):
 
 
 
-def calcMeanRaster(extent, thefile):
+def calcMeanRaster(extentfile, thefile):
         
 
     # Check out any necessary licenses
@@ -214,11 +213,13 @@ def calcMeanRaster(extent, thefile):
 # The following inputs are layers or table views: "Agritourism_google.img"
 
     # Local variables:
-    tempfile = "D:\\GIS Server Data\\datafiles\\tempfile" + str(time.time()) + ".img"
+    tempfile = "D:\\GIS Server Data\\datafiles\\tempfile" + str(int(time.time())) + ".img"
 
     try:
+        outExtractByMask = arcpy.sa.ExtractByMask(thefile, extentfile)
+        outExtractByMask.save(tempfile)
         # Process: Extract by Rectangle
-        arcpy.gp.ExtractByRectangle_sa(thefile, extent, tempfile, "INSIDE")
+        #arcpy.gp.ExtractByRectangle_sa(thefile, extent, tempfile, "INSIDE")
     
         # Process: Get Raster Properties
         meanRes = arcpy.GetRasterProperties_management(tempfile, "MEAN")
@@ -249,17 +250,19 @@ class MyFuncs:
     def getMeanRaster(self, extent):
         print "runnig the mean raster"
         #need to rotate extent
-        extentsplit = extent.split(",")
-        extent = " ".join([extentsplit[0], extentsplit[3], extentsplit[2], extentsplit[1]])
         WORKINGDIRECTORY = "D:/GIS Server Data/datafiles/"
+        extentfile = createExtentFile(extent)
+        if (extentfile == "error"):
+            return "error"
         processingfiles = ["Agritourism_google", "ahi_google", "biodigestor_google", "grapes_google", "manurespread_google", "solarsuit_google", "winsuit_google"]
         finalresults = []
         for thefile in processingfiles:
             print "Doing " + thefile
-            theresult = calcMeanRaster(extent, WORKINGDIRECTORY + thefile + ".img")
+            theresult = calcMeanRaster(extentfile, WORKINGDIRECTORY + thefile + ".img")
             if (theresult == "error" or str(theresult) == "0"):
                 return "error"
             finalresults.append([thefile, theresult])
+        arcpy.Delete_management(extentfile, "")
         return finalresults
         
     def getPolygonValues(self,extent):
