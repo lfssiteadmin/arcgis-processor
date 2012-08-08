@@ -5,12 +5,16 @@ import networkx as nx
 #import arcserver
 import arcpy
 import time
+import sys
 
 # Create server
 #amp-7vcj3h1-dt
 #server = SimpleXMLRPCServer(("0.0.0.0", 8000), )
-#server = SimpleXMLRPCServer(("164.107.87.141", 8000), )
-server = SimpleXMLRPCServer(("164.107.87.183", 8000), )
+
+if (sys.argv[1] == "test"):
+    server = SimpleXMLRPCServer(("164.107.87.183", 8000), )
+else:
+    server = SimpleXMLRPCServer(("164.107.87.141", 8000), )
 
 
 server.register_introspection_functions()
