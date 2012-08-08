@@ -161,7 +161,7 @@ def calcCroplandData(extent):
     
     
 
-def calcPolygonValues(extentfile, processingFile, attributes):
+def calcPolygonValues(extentfile, processingFile):
     import os
     import csv
     
@@ -182,7 +182,7 @@ def calcPolygonValues(extentfile, processingFile, attributes):
             
         
         # Process: Export Feature Attribute to ASCII
-        arcpy.ExportXYv_stats(Output_Feature_Class, "NAME;" + attributes, "COMMA", tempcalc2_txt)
+        arcpy.ExportXYv_stats(Output_Feature_Class, "CNTYIDFP;NAME", "COMMA", tempcalc2_txt)
         arcpy.Delete_management(Output_Feature_Class, "")
         resultfile = open(tempcalc2_txt, 'rb')
         resultreader = csv.reader(resultfile)
@@ -270,13 +270,16 @@ class MyFuncs:
         print "running the polygon values"
         extentfile = createExtentFile(extent)
         WORKINGDIRECTORY = "D:/GIS Server Data/agstats/"
-        processingfiles = [["AnimalSales", "2007Values"], ["AvgAge", "Value_2007"], ["AvgSize", "2007Averag"], ["CropArea", "2007Value"], \
-            ["CropSales", "2007Value"], ["Expenses","2007Value"] , ["GainLoss","ratio"], \
-            ["operationsbysizet", "a1_10;a10_50;a50_70;a70_100;a100_140;a140_170;a180_219;a220_259;a260_499;a500_1000;a1000___20;a2000_more"], \
-            ["Receipts", "2007Value"], ["TotalOperations", "Values2007"]]
+        processingfiles = [["AnimalSales"]]
+        #THE OPERTIONS VALUES  are in a10_50	a100_140	a140_170	a180_219	a2000_more	a220_259	a260_499	a50_70	a500_1000	a70_100
+            #, "2007Values"
+#        , ["AvgAge", "Value_2007"], ["AvgSize", "2007Averag"], ["CropArea", "2007Value"], \
+#            ["CropSales", "2007Value"], ["Expenses","2007Value"] , ["GainLoss","ratio"], \
+#            ["operationsbysizet", "a1_10;a10_50;a50_70;a70_100;a100_140;a140_170;a180_219;a220_259;a260_499;a500_1000;a1000___20;a2000_more"], \
+#            ["Receipts", "2007Value"], ["TotalOperations", "Values2007"]]
         finalresults =   []     
         for thefile in processingfiles:
-            theresult = calcPolygonValues(extentfile, WORKINGDIRECTORY + thefile[0] + ".shp", thefile[1])
+            theresult = calcPolygonValues(extentfile, WORKINGDIRECTORY + thefile[0] + ".shp")
             if (theresult == "error" or len(theresult) == 0):
                 return "error"
             finalresults.append([thefile[0], theresult])
