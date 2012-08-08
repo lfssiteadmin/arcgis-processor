@@ -2,14 +2,15 @@
 
 from SimpleXMLRPCServer import SimpleXMLRPCServer
 import networkx as nx
-import arcserver
+#import arcserver
 import arcpy
 import time
 
 # Create server
 #amp-7vcj3h1-dt
 #server = SimpleXMLRPCServer(("0.0.0.0", 8000), )
-server = SimpleXMLRPCServer(("164.107.87.141", 8000), )
+#server = SimpleXMLRPCServer(("164.107.87.141", 8000), )
+server = SimpleXMLRPCServer(("164.107.87.183", 8000), )
 
 
 server.register_introspection_functions()
@@ -49,7 +50,7 @@ def createExtentFile(extent):
     
     # Get the template feature class
     #
-    template = "D:\\GIS Server Data\\templatefile.shp"
+    template = "D:\\GIS Server Data\\templateprojected.shp"
     
     try:
        # Create the output feature class
@@ -117,7 +118,7 @@ def calcCroplandData(extent):
 
     ## Need to update this for the future file place
     
-    processingfile = "D:\\GIS Server Data\\cropland\\2011_30m_cdls_projectraster.img"
+    processingfile = "D:\\GIS Server Data\\cropland\\croplanddata_gen.tif"
 
     #processingfile = "D:\\Python Scripts\\LFSservices\\cropland\\2011_30m_cdls_projectraster.img" # provide a default value if unspecified
     #if Agritourism_google_img == '#' or not Agritourism_google_img:
@@ -140,12 +141,25 @@ def calcCroplandData(extent):
     #results = ""
     from dbfpy import dbf
     
+    #on the new 0 -     
+    
     try:
         finalresults = []
         thedbf = dbf.Dbf(tempfile + ".vat.dbf")
         for row in thedbf:
-            temparea = row[4]*900*.000247105381
-            finalresults.append([row[5], row[4], temparea])
+            dataname = ""
+            if row[0] == 0: 
+                dataname = "Commodity Crops"
+            elif row[0] == 1: 
+                dataname = "Specialty Crops"
+            elif row[0] == 2: 
+                dataname = "Developed Area"
+            elif row[0] == 3: 
+                dataname = "Natural Resources"
+            else :
+                dataname = "Misc"
+            temparea = row[1]*900*.000247105381
+            finalresults.append([dataname, row[1], temparea])
             #results += str(row)
     except Exception as e:
        print e
@@ -181,7 +195,7 @@ def calcPolygonValues(extentfile, processingFile):
         tempcalc2_txt = "C:\\Windows\\temp\\tempcalc" + str(int(time.time())) + ".csv"
             
         
-        # Process: Export Feature Attribute to ASCII
+        #Process: Export Feature Attribute to ASCII
         arcpy.ExportXYv_stats(Output_Feature_Class, "CNTYIDFP;NAME", "COMMA", tempcalc2_txt)
         arcpy.Delete_management(Output_Feature_Class, "")
         resultfile = open(tempcalc2_txt, 'rb')
@@ -191,10 +205,11 @@ def calcPolygonValues(extentfile, processingFile):
             resultobj.append(row[2:len(row)])
         resultfile.close()   
         os.remove(tempcalc2_txt)
+    
     except Exception as e:
         print e
         return "error"
-        
+    print resultobj
     return resultobj
 
 
@@ -284,6 +299,7 @@ class MyFuncs:
                 return "error"
             finalresults.append([thefile[0], theresult])
         arcpy.Delete_management(extentfile, "")
+        print finalresults
         return finalresults
 
     def getCroplandData(self, extent):
