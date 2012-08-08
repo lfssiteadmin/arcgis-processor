@@ -269,7 +269,7 @@ class MyFuncs:
         extentfile = createExtentFile(extent)
         if (extentfile == "error"):
             return "error"
-        processingfiles = ["Agritourism_google", "ahi_google", "biodigestor_google", "grapes_google", "manurespread_google", "solarsuit_google", "winsuit_google"]
+        processingfiles = ["Agritourism_resample", "ahi_resample", "biodigestor_resample", "grapes_resample", "manurespread_resample", "solarsuit_resample", "winsuit_resample"]
         finalresults = []
         for thefile in processingfiles:
             print "Doing " + thefile
