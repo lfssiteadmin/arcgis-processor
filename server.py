@@ -14,7 +14,7 @@ import sys
 if (sys.argv[1] == "test"):
     server = SimpleXMLRPCServer(("164.107.87.183", 8000), )
 else:
-    server = SimpleXMLRPCServer(("164.107.87.141", 8000), )
+    server = SimpleXMLRPCServer(("164.107.84.29", 8000), )
 
 
 server.register_introspection_functions()
