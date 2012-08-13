@@ -11,10 +11,11 @@ import sys
 #amp-7vcj3h1-dt
 #server = SimpleXMLRPCServer(("0.0.0.0", 8000), )
 
-if (sys.argv[1] == "test"):
+if (len(sys.argv) > 1 and sys.argv[1] == "test"):
     server = SimpleXMLRPCServer(("164.107.87.183", 8000), )
 else:
     server = SimpleXMLRPCServer(("164.107.84.29", 8000), )
+    THEPATH = r"//it-bitbox-vm/share/AMP/GIS Server Data/"
 
 
 server.register_introspection_functions()
@@ -54,7 +55,7 @@ def createExtentFile(extent):
     
     # Get the template feature class
     #
-    template = "D:\\GIS Server Data\\templateprojected.shp"
+    template = r"//it-bitbox-vm/share/AMP/GIS Server Data/templateprojected.shp"
     
     try:
        # Create the output feature class
@@ -122,7 +123,7 @@ def calcCroplandData(extent):
 
     ## Need to update this for the future file place
     
-    processingfile = "D:\\GIS Server Data\\cropland\\croplanddata_gen.tif"
+    processingfile = r"//it-bitbox-vm/share/AMP/GIS Server Data/cropland/croplanddata_gen.tif"
 
     #processingfile = "D:\\Python Scripts\\LFSservices\\cropland\\2011_30m_cdls_projectraster.img" # provide a default value if unspecified
     #if Agritourism_google_img == '#' or not Agritourism_google_img:
@@ -232,7 +233,7 @@ def calcMeanRaster(extentfile, thefile):
 # The following inputs are layers or table views: "Agritourism_google.img"
 
     # Local variables:
-    tempfile = "D:\\GIS Server Data\\datafiles\\tempfile" + str(int(time.time())) + ".img"
+    tempfile = r"//it-bitbox-vm/share/AMP/GIS Server Data/datafiles/tempfile" + str(int(time.time())) + ".img"
 
     try:
         outExtractByMask = arcpy.sa.ExtractByMask(thefile, extentfile)
@@ -269,7 +270,7 @@ class MyFuncs:
     def getMeanRaster(self, extent):
         print "runnig the mean raster"
         #need to rotate extent
-        WORKINGDIRECTORY = "D:/GIS Server Data/datafiles/"
+        WORKINGDIRECTORY = r"//it-bitbox-vm/share/AMP/GIS Server Data/datafiles/"
         extentfile = createExtentFile(extent)
         if (extentfile == "error"):
             return "error"
@@ -288,7 +289,7 @@ class MyFuncs:
         #create the extent raster here so it can be pulled from the processes
         print "running the polygon values"
         extentfile = createExtentFile(extent)
-        WORKINGDIRECTORY = "D:/GIS Server Data/agstats/"
+        WORKINGDIRECTORY = r"//it-bitbox-vm/share/AMP/GIS Server Data/agstats/"
         processingfiles = [["AnimalSales"]]
         #THE OPERTIONS VALUES  are in a10_50	a100_140	a140_170	a180_219	a2000_more	a220_259	a260_499	a50_70	a500_1000	a70_100
             #, "2007Values"
