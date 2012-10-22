@@ -9,7 +9,7 @@ Created on Mon Oct 22 11:13:30 2012
 
 #helper functions
 
-import networkx as nx
+
 #import arcserver
 #import arcpy
 import time
@@ -155,15 +155,7 @@ from twisted.web import xmlrpc, server
 class MyFuncs(xmlrpc.XMLRPC):
     allow_none=True
     allowNone=True
-    def get_cycles(self, nodes, edges): 
 
-
-        mygraph = createGraph(nodes, edges)
-        
-        cycles =  nx.simple_cycles(mygraph)
-        print str(cycles)
-        #mygraph.clear()
-        return cycles
     
     def xmlrpc_getMeanRaster(self, extent):
         print "runnig the mean raster"
