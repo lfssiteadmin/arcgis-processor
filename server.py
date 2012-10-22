@@ -1,24 +1,23 @@
 #!/usr/bin/python
 
-from SimpleXMLRPCServer import SimpleXMLRPCServer
+#helper functions
+
 import networkx as nx
-import arcserver
-import arcpy
+#import arcserver
+#import arcpy
 import time
-import sys
-
-# Create server
-#amp-7vcj3h1-dt
-#server = SimpleXMLRPCServer(("0.0.0.0", 8000), )
-
-if (len(sys.argv) > 1 and sys.argv[1] == "test"):
-    server = SimpleXMLRPCServer(("164.107.87.183", 8000), )
-else:
-    server = SimpleXMLRPCServer(("164.107.84.29", 8000), )
-    THEPATH = "\\\\it-bitbox-vm\\share\\AMP\\GIS Server Data\\"
 
 
-server.register_introspection_functions()
+
+
+import subprocess
+import Image
+import numpy
+import os
+import pickle
+
+
+
 
 
 def createGraph(nodes,edges):
@@ -39,6 +38,8 @@ def createExtentFile(extent):
     #   Each coordinate entry is semicolon delimited in the format of ID;X;Y
     
     # Import ArcPy and other required modules
+    
+    return "error"
 
 
     import os
@@ -60,14 +61,15 @@ def createExtentFile(extent):
     try:
        # Create the output feature class
        #
-
        arcpy.CreateFeatureclass_management(os.path.dirname(tempextentfile),
                                            os.path.basename(tempextentfile), 
                                            "Polygon", template, "DISABLED", "DISABLED", template)
     
        # Open an insert cursor for the new feature class
        #
+       print "doing cursor"
        cur = arcpy.InsertCursor(tempextentfile)
+       print "could not do cursor"
     
        # Create an array and point object needed to create features
        #
@@ -78,6 +80,7 @@ def createExtentFile(extent):
     
        # Initialize a variable for keeping track of a feature's ID.
        #
+       print "adding the feature"
        extentsplit = extent.split(",")
        #Bottom Left
        pnt.X = extentsplit[0]
@@ -102,7 +105,7 @@ def createExtentFile(extent):
        feat.shape = lineArray
        cur.insertRow(feat)
        
-
+       print "deleting cursor"
        del cur
        return tempextentfile
     except Exception as e:
@@ -112,12 +115,67 @@ def createExtentFile(extent):
 
 def calcCroplandData(extent):
     
+    filenamein = 'C:/Users/hilbert.34/Desktop/cropland/croplanddata_gen.tif'
+    filenameout = 'C:/Users/hilbert.34/Desktop/cropland/croplanddata_gen_temp' + str(int(time.time())) + '.tif'
+    
+    ps = subprocess.call(["C:/GDAL/gdal_translate.exe", "-projwin", "-9578185", "4622715", "-9506803","4580583", filenamein,filenameout])    
+    print "writing now"    
+    
+    finalresults = []   
+    
+    with open(filenameout, mode='rb') as imagefile:
+        im = Image.open(imagefile)
+        
+        print "image closed"
+        imarray = numpy.array(im)
+        del im
+        print "got array"
+        imagefile.close()
+    print "file removed"
+    os.remove(filenameout)
+
+    print "converted to array"
+    histo = numpy.histogram(imarray,bins=[0,1,2,3,4])
+    datanames = ["Commodity Crops", "Specialty Crops", "Developed Area", "Natural Resources"]
+
+    for dataname, counter in zip(datanames, histo[0]):
+        temparea = counter*900*.000247105381
+        finalresults.append([dataname, " ", temparea])
+    print finalresults
+
+    return pickle.dumps(finalresults)
+
+    return finalresults
+    
+  
+      
+    
+    
+#            if row[0] == 0: 
+#                dataname = "Commodity Crops"
+#            elif row[0] == 1: 
+#                dataname = "Specialty Crops"
+#            elif row[0] == 2: 
+#                dataname = "Developed Area"
+#            elif row[0] == 3: 
+#                dataname = "Natural Resources"    
+    
+    
+    #### OLD CODE
+    
+    
+    
+    
     # Check out any necessary licenses
     arcpy.CheckOutExtension("spatial")
     #extent = "-9099915, 5051882, -9043924, 5037452"
     extentfile = createExtentFile(extent)
     if (extentfile == "error"):
         return "error"
+        
+        
+        
+        
 
     # Script arguments
 
@@ -132,7 +190,7 @@ def calcCroplandData(extent):
     # Local variables:
     tempfile = "C:\\Windows\\temp\\NASS" + str(int(time.time())) + ".img"
     
-
+    print "extracting mask"
     # Process: Extract by Rectangle
     #arcpy.gp.ExtractByRectangle_sa(processingfile, extent, tempfile, "INSIDE")
     #print "finished extracting"
@@ -181,6 +239,9 @@ def calcCroplandData(extent):
     
 
 def calcPolygonValues(extentfile, processingFile):
+    
+    return "error"    
+    
     import os
     import csv
     
@@ -222,6 +283,8 @@ def calcPolygonValues(extentfile, processingFile):
 
 
 def calcMeanRaster(extentfile, thefile):
+    
+    return "error"
         
 
     # Check out any necessary licenses
@@ -254,6 +317,25 @@ def calcMeanRaster(extentfile, thefile):
 
     return meanRes.getOutput(0)
     
+
+
+
+
+
+
+
+
+
+
+
+
+
+#start this with server.py test
+
+import SocketServer
+from SimpleXMLRPCServer import SimpleXMLRPCServer, SimpleXMLRPCRequestHandler
+
+class AsyncXMLRPCServer(SocketServer.ThreadingMixIn, SimpleXMLRPCServer):pass
 
 
 class MyFuncs:
@@ -310,15 +392,47 @@ class MyFuncs:
     def getCroplandData(self, extent):
         print "running the cropland stuff"
         return calcCroplandData(extent)
+        
+        
+        
+import sys        
+        
+# Create server
+#amp-7vcj3h1-dt
+#server = SimpleXMLRPCServer(("0.0.0.0", 8000), )
+
+if (len(sys.argv) > 1 and sys.argv[1] == "test"):
+    server = AsyncXMLRPCServer(("164.107.87.183", 8000), SimpleXMLRPCRequestHandler, allow_none=True)
+    print "running as test server"     
+else:
+    server = AsyncXMLRPCServer(("164.107.84.29", 8000), SimpleXMLRPCRequestHandler, allow_none=True) 
+    THEPATH = "\\\\it-bitbox-vm\\share\\AMP\\GIS Server Data\\"
 
 
-    
 server.register_instance(MyFuncs())
+
+
+server.register_introspection_functions()        
 
 print "serving"
 print server.system_listMethods()
 
 # Run the server's main loop
 server.serve_forever()
+       
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
 
 
